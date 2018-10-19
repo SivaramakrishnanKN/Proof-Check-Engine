@@ -6,17 +6,11 @@
 
 using namespace std;
 
-struct Operator {
-	char Symbol;
-	int Priority;
-};
-
 // Stack with Push, Pop, Display Functions
 class Stack {
 	// Structure of Stack
 	struct Node {
 		char Value; // Holds Symbol
-		int Priority; // Holds Priority value of the Symbol
 		Node * Next; // Pointer to next Node
 	};
 	Node * top; //Pointer to the top of the Stack
@@ -29,24 +23,25 @@ class Stack {
 	}
 	
 	// Push X to top of the Stack
-	void Push(char X, int p ) {
+	void Push(char X) {
 		Node * temp = new Node;
 		temp->Value = X;
-		temp->Priority = p;
 		temp->Next = top;
 		top = temp;	
 	}
 	
 	// Pop the last element from the stack
-	Node Pop() {
+	char Pop() {
 		// If there is no Node in the stack then exit
 		if(top==NULL) {
 			cout<<"Error";
 			return;
 		}		
+		char Val = top->Value;
 		Node * temp = top;
 		top = top->Next;
 		delete(temp); // Deletes old Top node
+		return Val;
 	}
 	
 	// Displays Every node in the Stack from Top to Bottom
@@ -78,30 +73,52 @@ class Stack {
 int Check_Operator(char op, Stack s) {
 	if(s.top == NULL)
 		return 1;
-	
-	if(s.top->Priority
+	int P;
+	if(op=='^')
+		P = 4;
+	else if(op=='V')
+		p = 3;
+	else if(op=='~')
+		p = 5;
+	else if(op=='>')
+		p = 2;	
+	if(P>s.top->Priority)
+		return 1;
+	else return 0;
 }
 
-void Infix_to_Postfix(string s) {
+string Infix_to_Postfix(string Infix) {
 	string Postfix;
 	Stack stack;
-	for(int i=0; i<s.length(); i++) {
+	for(int i=0; i<Infix.length(); i++) {
 	
-		// If s[i] is an Operand push it into the Postfix string
-		if(tolower(s[i])>='a'&&tolower(s[i])<='z')
-			Postfix+=s[i];
+		// If Infix[i] is an Operand push it into the Postfix string
+		if(tolower(Infix[i])>='a'&&tolower(Infix[i])<='z')
+			Postfix+=Infix[i];
 		
-		// If s[i] is '(' then push it into the stack
-		else if(s[i]=='(') {
-			stack.Push(s[i]);
+		// If Infix[i] is '(' then push it into the stack
+		else if(Infix[i]=='(') {
+			stack.Push(Infix[i]);
 		}
 		
-		// If s[i] is an Operator push it into the stack if it is of a higher precedence
-		// than the last element of the  stacl
-		else if(s[i]=='^') {
-			
+		// If Infix[i] is an Operator push it into the stack if it is of a higher precedence
+		// than the last element of the  stack
+		else if(Infix[i]=='^'||Infix[i]=='V'||Infix[i]=='~'||Infix[i]=='>') {
+			if(Check_Operator(Infix[i], stack)) {
+				stack.Push(Infix[i]);
+			}
+			else {
+				while(Check_Operator(Infix[i], stack)) {
+					Postfix+=stack.Pop();
+				}
+			}
 		}
-		
+		else if(Infix[i]=='(')
+			stack.Push(Infix[i]);
+		else if(Infix[i]==')') {
+			while(stack.top->Value!='(')
+				Postfix+=stack.Pop();
+		}
 	}
 }
 
@@ -117,21 +134,7 @@ int main() {
 			char X;
 			fflush(stdin);
 			std::cin>>X;
-			if(X=='^')
-				s.Push(X,4);
-			else if(X=='V',3)
-				s.Push(X);
-			else if(X=='>',2)
-				s.Push(X);
-			else if(X=='~')
-				s.Push(X,5);
-			else if(X=='(')
-				s.Push(X,1);
-			else if(X==')')
-				s.Push(X,1);
-			else if(tolower(X)>='a'&&tolower(X)<='b')
-				s.Push(X,0);
-		
+			s.Push(X);
 		}
 		else if(n==2)
 			s.Pop();
