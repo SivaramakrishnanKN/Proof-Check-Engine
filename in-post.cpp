@@ -6,16 +6,19 @@
 
 using namespace std;
 
+
+
 // Stack with Push, Pop, Display Functions
 class Stack {
+		
+	public:
 	// Structure of Stack
 	struct Node {
 		char Value; // Holds Symbol
+		int Priority; // Holds Priority value of the Symbol
 		Node * Next; // Pointer to next Node
 	};
 	Node * top; //Pointer to the top of the Stack
-		
-	public:
 	
 	// Default Constructor assigns top as NULL
 	Stack() {
@@ -23,32 +26,29 @@ class Stack {
 	}
 	
 	// Push X to top of the Stack
-	void Push(char X) {
+	void Push(char X, int P = 0) {
 		Node * temp = new Node;
 		temp->Value = X;
+		temp->Priority = P;
 		temp->Next = top;
 		top = temp;	
 	}
 	
 	// Pop the last element from the stack
-	char Pop() {
+	void Pop() {
 		// If there is no Node in the stack then exit
-		if(top==NULL) {
-			cout<<"Error";
+		if(top==NULL)
 			return;
-		}		
-		char Val = top->Value;
 		Node * temp = top;
 		top = top->Next;
-		delete(temp); // Deletes old Top node
-		return Val;
+		delete temp; // Deletes old Top node
 	}
 	
 	// Displays Every node in the Stack from Top to Bottom
 	void Display() {
 		Node * temp =top;
 		while(temp!=NULL) {
-			std::cout<<temp->Value<<" ";
+			std::cout<<temp->Value;
 			temp = temp->Next;
 		}
 	}
@@ -76,12 +76,12 @@ int Check_Operator(char op, Stack s) {
 	int P;
 	if(op=='^')
 		P = 4;
-	else if(op=='V')
-		p = 3;
+	else if(op=='+')
+		P = 3;
 	else if(op=='~')
-		p = 5;
+		P = 5;
 	else if(op=='>')
-		p = 2;	
+		P = 2;	
 	if(P>s.top->Priority)
 		return 1;
 	else return 0;
@@ -103,29 +103,93 @@ string Infix_to_Postfix(string Infix) {
 		
 		// If Infix[i] is an Operator push it into the stack if it is of a higher precedence
 		// than the last element of the  stack
-		else if(Infix[i]=='^'||Infix[i]=='V'||Infix[i]=='~'||Infix[i]=='>') {
+		else if(Infix[i]=='^'||Infix[i]=='+'||Infix[i]=='~'||Infix[i]=='>') {
 			if(Check_Operator(Infix[i], stack)) {
 				stack.Push(Infix[i]);
 			}
 			else {
 				while(Check_Operator(Infix[i], stack)) {
-					Postfix+=stack.Pop();
+					Postfix+=stack.top->Value;
+					stack.Pop();
 				}
 			}
 		}
-		else if(Infix[i]=='(')
-			stack.Push(Infix[i]);
 		else if(Infix[i]==')') {
-			while(stack.top->Value!='(')
-				Postfix+=stack.Pop();
+			while(stack.top->Value!='(' && stack.top!=NULL)
+				Postfix+=stack.top->Value;
+				stack.Pop();
 		}
+		cout<<"Stack: ";
+		stack.Display();
+		cout<<" Postfix: "<<Postfix<<"\n";
 	}
 }
+
+// Binary Parse tree with Insert and Traverse Functions
+class Parse_Tree {
+	public: 
+	struct node{
+		node * left;
+		node * right;
+		char x;
+	};
+	node * Root;
+	Parse_Tree() {
+		Root->left = NULL;
+		Root->right = NULL;
+		Root->x = '\0';
+	}
+	// Function to insert a node into the Parse tree
+	void Insert(node ** head, char data)
+	{
+		node * temp;
+	
+		if(*head == NULL) {
+			temp = new node;
+			temp->x = data;
+			temp->left = NULL;
+			temp->right = NULL;
+			*head = temp;
+		}
+	
+		else if((*head)->x=='!') {
+		char ch;
+		std::cin>>ch;
+		Insert(&(*head)->right, data);
+		}
+	
+		else {
+		printf("Insert left(l) or right(r)");
+		char ch;
+		std::cin>>ch;
+		if(ch=='l')
+		{
+			Insert(&(*head)->left, data);
+		}
+		else if (ch=='r')
+		{
+			Insert(&(*head)->right, data);
+		}
+		}
+	}
+	
+	void inorder(node * head)
+	{
+		if(head !=NULL)
+		{
+			inorder(head->left);
+			std::cout<<head->x;
+			inorder(head->right);
+		}
+	}	
+
+};
 
 int main() {
 
 	Stack s;
 	int n=0;
+	/*
 	do {
 		cout<<"\n1.Push\n2.Pop\n3.Display\n4.Exit\n";
 		cin>>n;
@@ -134,8 +198,20 @@ int main() {
 			char X;
 			fflush(stdin);
 			std::cin>>X;
-			s.Push(X);
-		}
+			if(X=='^')
+				s.Push(X,4);
+			else if(X=='V')
+				s.Push(X,3);
+			else if(X=='>')
+				s.Push(X,2);
+			else if(X=='~')
+				s.Push(X,5);
+			else if(X=='(')
+				s.Push(X,1);
+			else if(X==')')
+				s.Push(X,1);
+			else if(tolower(X)>='a'&&tolower(X)<='z')
+				s.Push(X,0);		}
 		else if(n==2)
 			s.Pop();
 		else if(n==3)
@@ -144,6 +220,11 @@ int main() {
 		else cout<<"Invalid Input";
 	
 	} while(n!=4);
-
+	*/
+	string Infix;
+	cout<<"Enter an infix with Proper Paranthesis: ";
+	cin>>Infix;
+	string Postfix = Infix_to_Postfix(Infix);
+	cout<<"\nThe final Postfix is: "<<Postfix;
 	return 0;
 }
